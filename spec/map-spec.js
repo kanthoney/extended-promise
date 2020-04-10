@@ -1,6 +1,6 @@
 'use strict';
 
-const Promise = require('../extended-promise');
+const Promise = require('../index');
 const { resolves, rejects } = require('./promises');
 
 describe('map tests', () => {

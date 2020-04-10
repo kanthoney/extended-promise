@@ -1,6 +1,6 @@
 'use strict';
 
-const Promise = require('../extended-promise');
+const Promise = require('../index');
 
 module.exports.resolves = (result, time) => {
   return new Promise((resolve, reject) => {

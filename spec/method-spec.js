@@ -1,6 +1,6 @@
 'use strict';
 
-const Promise = require('../extended-promise.js');
+const Promise = require('../index');
 const { resolves, rejects } = require('./promises');
 
 describe('method tests', () => {

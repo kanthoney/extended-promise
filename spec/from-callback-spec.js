@@ -1,6 +1,6 @@
 'use strict';
 
-const Promise = require('../extended-promise');
+const Promise = require('../index');
 
 const succeeds = (val, done) => {
   setTimeout(() => {
