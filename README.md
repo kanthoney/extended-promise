@@ -16,7 +16,7 @@ const Promise = require('@kanthoney/extended-promise');
 
 ## Methods
 
-1. `tap(f)`
+* `tap(f)`
 
 Calls f on the resolved value, returning the original value
 
@@ -29,7 +29,7 @@ Promise.resolve(5)
 })
 ```
 
-1. `tapCatch(f)`
+* `tapCatch(f)`
 
 Like `tap` but for `catch`.
 
@@ -41,7 +41,7 @@ Promise.reject('error').tapCatch(error => {
 })
 ```
 
-1. `delay(t)`
+* `delay(t)`
 
 Introduces a delay in milliseconds
 
@@ -53,31 +53,31 @@ Promise.resolve(result)
 });
 ```
 
-1. <a name="disposer">`disposer(f)`</a>
+* <a name="disposer">`disposer(f)`</a>
 
 Used with [`using`](#using) for disposing resources. `f` is a function which takes a resource and disposes of that resource.
 
-1. `all`
+* `all`
 
 Calls `Promise.all` on the resolved value. Assumes the resolved value is an array.
 
 ## static methods
 
-1. `each(a, f, options)`
+* `each(a, f, options)`
 
 calls function `f`, which may return a promise, on each item of array or iterator `a`. Returns a promise resolving to `undefined` or the value of the first rejected promise in
 the case of an error. `options` is an object for configuration parameters. There is currently one parameter, `concurrency`, which is the maximum number of promises called simultaneously.
 
-1. `map(a, f, options)`
+* `map(a, f, options)`
 
 Calls function `f`, which may return a promise, on each of item of array or iterator `a`. Returns an array of the resolved values `f(item)`, in the same order as `a` even if the values
 were resolved in a different order. `options` is a configuration object currently with one parameter `concurrency` which is the maximum number of promises called simultaneously.
 
-1. `mapSeries(a, f)`
+* `mapSeries(a, f)`
 
 Like `map` but with a concurrency of 1.
 
-1. `reduce(a, f, acc)`
+* `reduce(a, f, acc)`
 
 For each `item` in array or iterator `a`, calls `f` with parameters `(acc, item)`. The return value of `f` is passed to the next call as the `acc` parameter. Returns the final `acc` value.
 `acc` defaults to 0.
@@ -89,7 +89,7 @@ Promise.reduce([1, 2, 3], (acc, i) => Promise.resolve(acc + i), 0)
 });
 ```  
 
-1. `props(a)`
+* `props(a)`
 
 `a` is an object where the object properties can be promises. Returns an object of the same format with the properties resolved.
 
@@ -102,7 +102,7 @@ Promise.props({
 });
 ```
 
-1. `filter(a, f)`
+* `filter(a, f)`
 
 Returns an array of those items of `a` for which `f(item)` resolves to a truthy value.
 
@@ -113,7 +113,7 @@ Promise.filter([1,2,3,4,5], i => Promise.resolve(i%2 === 0))
 });
 ```
 
-1. `fromCallback(f)`
+* `fromCallback(f)`
 
 Used to call a function that takes a callback and return a promise. `f` is a function the takes one parameter, a callback function. In the example below, `db.query` is a function
 that takes a callback in the old node style and executes a database query q with parameter values v.
@@ -126,7 +126,7 @@ Promise.fromCallback(done => {
 });
 ```
 
-1. `coroutine(f)`
+* `coroutine(f)`
 
 Used with generator functions which yield promises. `f` is a generator function.
 
@@ -153,7 +153,7 @@ acc(5).then(pages => {
 `coroutine` creates the function `acc`. When this is called, `acc` calls the generator function with its parameters. Each time the `nextPage` function yields a promise, `coroutine`
 passes the resolved value to the `page` variable.
 
-1. `method(f)`
+* `method(f)`
 
 Converts a function `f` which may return a promise into one that definitely does.
 
@@ -164,7 +164,7 @@ f(5, 6).then(result => {
 });
 ```
 
-1. <a name="using">`using(disposer, f)`</a>
+* <a name="using">`using(disposer, f)`</a>
 
 Used to guarantee the disposal of a resource after it's been used. The first argument is an object of the `Disposer` class, obtained by calling the [`disposer`](#disposer) method, which takes a function
 which will dispose of the resource after `using` is finished. `f` is a function which takes the resource and returns the required result.
