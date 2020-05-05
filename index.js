@@ -36,13 +36,46 @@ class ExtendedPromise extends Promise
     return new Disposer(this, f);
   }
 
-  all(a)
+  each(f, options)
   {
-    return ExtendedPromise.all(a);
+    return this.then(result => ExtendedPromise.each(result, f, options));
+  }
+
+  map(f, options)
+  {
+    return this.then(result => ExtendedPromise.map(result, f, options));
+  }
+
+  mapSeries(f)
+  {
+    return this.then(result => ExtendedPromise.mapSeries(result, f));
+  }
+
+  reduce(f, acc)
+  {
+    return this.then(result => ExtendedPromise.reduce(result, f, acc));
+  }
+
+  filter(f)
+  {
+    return this.then(result => ExtendedPromise.filter(result, f));
+  }
+
+  all()
+  {
+    return this.then(result => ExtendedPromise.all(result));
+  }
+
+  props(options)
+  {
+    return this.then(result => ExtendedPromise.props(result, options));
   }
 
   static each(a, f, options)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.each(a, f, options));
+    }
     options = options || {};
     const it = a[Symbol.iterator]();
     const buffer = [];
@@ -68,6 +101,9 @@ class ExtendedPromise extends Promise
 
   static map(a, f, options)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.map(a, f, options));
+    }
     options = options || {};
     const it = a[Symbol.iterator]();
     let buffer = [];
@@ -99,11 +135,17 @@ class ExtendedPromise extends Promise
 
   static mapSeries(a, f, options)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.mapSeries(a, f, options));
+    }
     return ExtendedPromise.map(a, f, { ...options, concurrency: 1 });
   }
 
   static reduce(a, f, acc)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.reduce(a, f, acc));
+    }
     const it = a[Symbol.iterator]();
     const next = acc => {
       const n = it.next();
@@ -119,6 +161,9 @@ class ExtendedPromise extends Promise
 
   static filter(a, f)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.filter(a, f));
+    }
     const it = a[Symbol.iterator]();
     f = ExtendedPromise.method(f);
     const next = result => {
@@ -154,6 +199,9 @@ class ExtendedPromise extends Promise
 
   static props(a, options)
   {
+    if(a.then instanceof Function) {
+      return a.then(a => ExtendedPromise.props(a, options));
+    }
     options = options || {};
     const it = Object.keys(a)[Symbol.iterator]();
     const result = {};

@@ -61,6 +61,26 @@ Used with [`using`](#using) for disposing resources. `f` is a function which tak
 
 Calls `Promise.all` on the resolved value. Assumes the resolved value is an array.
 
+* `each(f, options)`
+
+Calls `Promise.each` on the resolved value. Assumes the resolved value is an array.
+
+* `map(f, options)`
+
+Calls `Promise.map` on the resolved value. Assumes the resolved value is an array.
+
+* `mapSeries(f)`
+
+Calls `Promise.mapSeries` on the resolved value. Assumes the resolved value is an array.
+
+* `reduce(f)`
+
+Calls `Promise.reduce` on the resolved value. Assumes the resolved value is an array.
+
+* `props()`
+
+Calls `Promise.props` on the resolved value. Assumes the resolved value is an object.
+
 ## static methods
 
 * `each(a, f, options)`
