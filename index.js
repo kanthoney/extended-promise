@@ -153,7 +153,7 @@ class ExtendedPromise extends Promise
         return ExtendedPromise.resolve(acc);
       }
       return ExtendedPromise.resolve(n.value).then(value => {
-        return next(f(acc, value));
+        return ExtendedPromise.resolve(f(acc, value)).then(next);
       });
     }
     return next(acc===undefined?0:acc);

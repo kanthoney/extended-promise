@@ -22,6 +22,14 @@ describe('reduce tests', () => {
         .finally(done);
   });
 
+  it('should concatenate strings with function that returns promise', done => {
+    const letters = 'abcde';
+    return Promise.reduce([1,2,3,4,5].map(i => resolves(letters[i-1])), (acc, letter) => Promise.resolve(`${acc}${letter}`), '')
+      .then(result => expect(result).toBe('abcde'))
+      .catch(fail)
+        .finally(done);
+  });
+
   describe("Promise tests", () => {
     it('should sum elements in array', done => {
       return Promise.reduce(Promise.resolve([1,2,3,4,5].map(i => resolves(i))), (acc, v) => acc+v)
