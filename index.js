@@ -265,6 +265,13 @@ class ExtendedPromise extends Promise
     return ExtendedPromise.reject('Using requires a disposer as the first argument');
   }
 
+  static delay(t, value)
+  {
+    return new ExtendedPromise((resolve) => {
+      setTimeout(() => resolve(value), t);
+    });
+  }
+
 };
 
 module.exports = ExtendedPromise;
