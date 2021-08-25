@@ -1,6 +1,6 @@
 'use strict';
 
-class ExtendedPromise extends global.Promise
+class ExtendedPromise extends Promise
 {
 
   tap(f)
