@@ -360,6 +360,33 @@ describe('map tests', () => {
       });
 
     });
+
+    describe('async iterator tests', () => {
+      async function* g(items)
+      {
+        for(let item of items) {
+          if(item > 3) {
+            yield rejects(item);
+          } else {
+            yield resolves(item);
+          }
+        }
+      }
+
+      it('should square each value of array using async iterator', done => {
+        return Promise.map(g([1,2,3]), i => i*i).then(result => {
+          expect(result).toEqual([1,4,9]);
+        }).catch(fail).finally(done);
+      });
+
+      it('should fail to square each value of array using async iterator', async done => {
+        return Promise.map(g([1,2,4]), i => i*i).then(fail).catch(error => {
+          expect(error).toBe(4);
+        }).finally(done);
+        
+      });
+
+    });
   });
 
 });

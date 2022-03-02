@@ -77,24 +77,38 @@ class ExtendedPromise extends Promise
       return a.then(a => ExtendedPromise.each(a, f, options));
     }
     options = options || {};
-    const it = a[Symbol.iterator]();
+    let next;
     const buffer = [];
-    const next = () => {
-      const n = it.next();
-      if(n.done) {
-        return;
+    if(a[Symbol.iterator]) {
+      const it = a[Symbol.iterator]();
+      const next = () => {
+        const n = it.next();
+        if(n.done) {
+          return;
+        }
+        return ExtendedPromise.resolve(n.value).then(value => f(value)).then(() => {
+          return next();
+        });
       }
-      return ExtendedPromise.resolve(n.value).then(value => f(value)).then(() => {
-        return next();
-      });
-    }
-    while(options.concurrency === undefined || buffer.length < options.concurrency) {
-      const n = next();
-      if(n === undefined) {
-        break;
-      } else {
-        buffer.push(n);
+      while(options.concurrency === undefined || buffer.length < options.concurrency) {
+        const n = next();
+        if(n === undefined) {
+          break;
+        } else {
+          buffer.push(n);
+        }
       }
+    } else {
+      const it = a[Symbol.asyncIterator]();
+      const next = () => {
+        return ExtendedPromise.resolve(it.next()).then(n => {
+          if(n.done) {
+            return;
+          }
+          return ExtendedPromise.resolve(f(n.value)).then(next);
+        });
+      }
+      buffer[0] = next();
     }
     return ExtendedPromise.all(buffer).then(() => {});
   }
@@ -105,32 +119,49 @@ class ExtendedPromise extends Promise
       return a.then(a => ExtendedPromise.map(a, f, options));
     }
     options = options || {};
-    const it = a[Symbol.iterator]();
     let buffer = [];
     let index = 0;
     let result = [];
-    const next = i => {
-      const n = it.next();
-      if(!n.done) {
-        return ExtendedPromise.resolve(n.value).then(value => {
-          return f(value);
-        }).then(r => {
-          result[i] = r;
-          return next(index++);
+    if(a[Symbol.iterator]) {
+      const it = a[Symbol.iterator]();
+      const next = i => {
+        const n = it.next();
+        if(!n.done) {
+          return ExtendedPromise.resolve(n.value, i).then(value => {
+            return f(value);
+          }).then(r => {
+            result[i] = r;
+            return next(index++);
+          });
+        }
+      }
+      while(options.concurrency === undefined || index < options.concurrency) {
+        const p = next(index++);
+        if(p === undefined) {
+          break;
+        } else {
+          buffer.push(p);
+        }
+      }
+      return ExtendedPromise.all(buffer).then(() => {
+        return result;
+      });
+    } else {
+      const it = a[Symbol.asyncIterator]();
+      const next = () => {
+        let i = index++;
+        return it.next().then(n => {
+          if(n.done) {
+            return;
+          }
+          return ExtendedPromise.resolve(f(n.value, i)).then(value => {
+            result[i] = value;
+            return next();
+          });
         });
       }
+      return next().then(() => result);
     }
-    while(options.concurrency === undefined || index < options.concurrency) {
-      const p = next(index++);
-      if(p === undefined) {
-        break;
-      } else {
-        buffer.push(p);
-      }
-    }
-    return ExtendedPromise.all(buffer).then(() => {
-      return result;
-    });
   }
 
   static mapSeries(a, f, options)
@@ -146,17 +177,33 @@ class ExtendedPromise extends Promise
     if(a.then instanceof Function) {
       return a.then(a => ExtendedPromise.reduce(a, f, acc));
     }
-    const it = a[Symbol.iterator]();
-    const next = acc => {
-      const n = it.next();
-      if(n.done) {
-        return ExtendedPromise.resolve(acc);
+    let next;
+    if(a[Symbol.iterator]) {
+      const it = a[Symbol.iterator]();
+      next = acc => {
+        const n = it.next();
+        if(n.done) {
+          return ExtendedPromise.resolve(acc);
+        }
+        return ExtendedPromise.resolve(n.value).then(value => {
+          return ExtendedPromise.resolve(f(acc, value)).then(next);
+        });
       }
-      return ExtendedPromise.resolve(n.value).then(value => {
-        return ExtendedPromise.resolve(f(acc, value)).then(next);
-      });
+      return next(acc===undefined?0:acc);
+    } else {
+      const it = a[Symbol.asyncIterator]();
+      next = acc => {
+        return ExtendedPromise.resolve(it.next().then(n => {
+          if(n.done) {
+            return ExtendedPromise.resolve(acc);
+          }
+          return ExtendedPromise.resolve(f(acc, n.value)).then(next);
+        }));
+      }
     }
-    return next(acc===undefined?0:acc);
+    if(next) {
+      return next(acc === undefined?0:acc);
+    }
   }
 
   static filter(a, f)
@@ -164,23 +211,43 @@ class ExtendedPromise extends Promise
     if(a.then instanceof Function) {
       return a.then(a => ExtendedPromise.filter(a, f));
     }
-    const it = a[Symbol.iterator]();
-    f = ExtendedPromise.method(f);
-    const next = result => {
-      const n = it.next();
-      if(n.done) {
-        return ExtendedPromise.resolve(result);
-      }
-      return ExtendedPromise.resolve(n.value).then(value => {
-        return f(value).then(flag => {
-          if(flag) {
-            return next(result.concat(value));
-          }
-          return next(result);
+    if(a[Symbol.iterator]) {
+      const it = a[Symbol.iterator]();
+      f = ExtendedPromise.method(f);
+      const next = result => {
+        const n = it.next();
+        if(n.done) {
+          return ExtendedPromise.resolve(result);
+        }
+        return ExtendedPromise.resolve(n.value).then(value => {
+          return f(value).then(flag => {
+            if(flag) {
+              return next(result.concat(value));
+            }
+            return next(result);
+          });
         });
-      });
+      }
+      return next([]);
+    } else {
+      const it = a[Symbol.asyncIterator]();
+      f = ExtendedPromise.method(f);
+      const next = result => {
+        return it.next().then(n => {
+          if(n.done) {
+            return ExtendedPromise.resolve(result);
+          }
+          return f(n.value).then(flag => {
+            if(flag) {
+              return next(result.concat(n.value));
+            }
+            return next(result);
+          });
+        });
+      }
+      return next([]);
     }
-    return next([]);
+    return ExtendedPromise.resolve([]);
   }
 
   static fromCallback(f)

@@ -182,4 +182,32 @@ describe('each tests', () => {
 
   });
 
+  describe('Async iterator tests', () => {
+
+    async function* g(items)
+    {
+      for(let item of items) {
+        yield Promise.resolve(item);
+      }
+      return;
+    }
+
+    it('should copy array using async iterator', done => {
+      let result = [];
+      return Promise.each(g([1, resolves(2), 3]), item => {
+        result.push(item);
+      }).then(() => {
+        expect(result).toEqual([1,2,3]);
+      }).catch(fail).finally(done);
+    });
+
+    it('should fail to copy array using async iterator', done => {
+      let result = [];
+      return Promise.each(g([1, rejects(2), 3]), item => {
+        result.push(item);
+      }).then(fail).catch(error => expect(error).toBe(2)).finally(done);
+    });
+
+  });
+
 });

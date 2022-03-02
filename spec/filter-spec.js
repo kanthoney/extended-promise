@@ -89,4 +89,30 @@ describe('filter tests', () => {
 
   });
 
+  describe('async iterator tests', () => {
+    async function* g(items)
+    {
+      for(let item of items) {
+        if(item > 3) {
+          yield rejects(item);
+        } else {
+          yield resolves(item);
+        }
+      }
+    }
+
+    it('should filter even values', done => {
+      return Promise.filter(g([1,2,3]), i => i%2===0).then(result => {
+        expect(result).toEqual([2]);
+      }).catch(fail).finally(done);
+    });
+
+    it('should fail to filter even values', done => {
+      return Promise.filter(g([1,2,3,4]), i => i%2===0).then(fail).catch(error => {
+        expect(error).toBe(4);
+      }).finally(done);
+    });
+
+  });
+
 });

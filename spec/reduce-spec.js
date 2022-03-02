@@ -70,4 +70,19 @@ describe('reduce tests', () => {
 
   });
 
+  describe('async iterator tests', () => {
+    it('should add elements using an async iterator', done => {
+      async function* g(items) {
+        for(let item of items) {
+          yield Promise.resolve(item);
+        }
+        return;
+      }
+      return Promise.reduce(g([1,2,3]), (acc, i) => acc+i, 0).then(result => {
+        expect(result).toBe(6);
+      }).catch(fail)
+        .finally(done);
+    });
+  });
+
 });
