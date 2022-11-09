@@ -115,4 +115,12 @@ describe('filter tests', () => {
 
   });
 
+  it('should throw on trying to filter non-iterable object', done => {
+    return Promise.filter(3, () => true).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
+  it('should throw on trying to filter promise of non-iterable object', done => {
+    return Promise.filter(Promise.resolve(3), () => true).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
 });

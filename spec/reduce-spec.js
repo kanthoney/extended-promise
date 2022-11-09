@@ -85,4 +85,12 @@ describe('reduce tests', () => {
     });
   });
 
+  it('should throw on trying to reduce non-iterable object', done => {
+    return Promise.reduce(3, (acc, i) => acc.concat(i), []).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
+  it('should throw on trying to reduce promise of non-iterable object', done => {
+    return Promise.reduce(Promise.resolve(3), (acc, i) => acc.concat(i), []).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
 });

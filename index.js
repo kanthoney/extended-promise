@@ -98,7 +98,7 @@ class ExtendedPromise extends Promise
           buffer.push(n);
         }
       }
-    } else {
+    } else if(a[Symbol.asyncIterator]) {
       const it = a[Symbol.asyncIterator]();
       const next = () => {
         return ExtendedPromise.resolve(it.next()).then(n => {
@@ -109,6 +109,8 @@ class ExtendedPromise extends Promise
         });
       }
       buffer[0] = next();
+    } else {
+      return ExtendedPromise.reject(new TypeError('Not iterable'));
     }
     return ExtendedPromise.all(buffer).then(() => {});
   }
@@ -146,7 +148,7 @@ class ExtendedPromise extends Promise
       return ExtendedPromise.all(buffer).then(() => {
         return result;
       });
-    } else {
+    } else if(a[Symbol.asyncIterator]) {
       const it = a[Symbol.asyncIterator]();
       const next = () => {
         let i = index++;
@@ -161,6 +163,8 @@ class ExtendedPromise extends Promise
         });
       }
       return next().then(() => result);
+    } else {
+      return ExtendedPromise.reject(new TypeError('Not iterable'));
     }
   }
 
@@ -190,7 +194,7 @@ class ExtendedPromise extends Promise
         });
       }
       return next(acc===undefined?0:acc);
-    } else {
+    } else if(a[Symbol.asyncIterator]) {
       const it = a[Symbol.asyncIterator]();
       next = acc => {
         return ExtendedPromise.resolve(it.next().then(n => {
@@ -200,6 +204,8 @@ class ExtendedPromise extends Promise
           return ExtendedPromise.resolve(f(acc, n.value)).then(next);
         }));
       }
+    } else {
+      return ExtendedPromise.reject(new TypeError('Not iterable'));
     }
     if(next) {
       return next(acc === undefined?0:acc);
@@ -229,7 +235,7 @@ class ExtendedPromise extends Promise
         });
       }
       return next([]);
-    } else {
+    } else if(a[Symbol.asyncIterator]) {
       const it = a[Symbol.asyncIterator]();
       f = ExtendedPromise.method(f);
       const next = result => {
@@ -246,6 +252,8 @@ class ExtendedPromise extends Promise
         });
       }
       return next([]);
+    } else {
+      return ExtendedPromise.reject(new TypeError('Not iterable'));
     }
     return ExtendedPromise.resolve([]);
   }

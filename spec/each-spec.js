@@ -210,4 +210,13 @@ describe('each tests', () => {
 
   });
 
+  it('should throw on trying to run each non-iterable object', done => {
+    return Promise.each(3, i => {}).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
+  it('should throw on trying to run each on promise of non-iterable object', done => {
+    return Promise.each(Promise.resolve(3), i => {}).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
 });
+

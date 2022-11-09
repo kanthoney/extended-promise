@@ -389,4 +389,12 @@ describe('map tests', () => {
     });
   });
 
+  it('should throw on trying to map non-iterable object', done => {
+    return Promise.map(3).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
+  it('should throw on trying to map promise of non-iterable object', done => {
+    return Promise.map(Promise.resolve(3)).then(fail).catch(error => expect(error instanceof TypeError).toBe(true)).finally(done);
+  });
+
 });
